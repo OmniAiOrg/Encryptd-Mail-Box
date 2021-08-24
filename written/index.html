@@ -68,6 +68,7 @@ function auto_copyright($year) {
 
 <script>
 const serverIpAddress = "https://us.omniai.org:8010";
+// const serverIpAddress = "http://localhost:8000";
 const paramName = "id";
 
 function submitForm() {
@@ -140,13 +141,10 @@ function getData(passwordExist=true) {
         dataType: "json",
         success: function(data){
             console.log(data);
-            const template = 
-              '<h3 class="ui header">'+data["title"]+'</h3>\
-              <div class="description"> ' +
-              data["text"]+'</div>'
-            document.getElementById("form").innerHTML = template;
-            $("#title").remove();
-            // $("#form").remove();
+            const textData = '<p style="font-size:15px">'+data["text"]+'</p>';
+            document.getElementById("form").innerHTML = textData;
+            // $("#title").remove();
+            $("#info").remove();
         },
         error: function(errMsg) {
             document.getElementById("info").innerHTML = 
@@ -223,10 +221,10 @@ function getQueryVariable(variable=paramName, set_info=true) {
 
 	
 	<title>写信 | 树洞</title>
-	<link rel="stylesheet" type="text/css" media="all" href="../rw_common/themes/Engineer/consolidated-4.css?rwcache=651519796" />
+	<link rel="stylesheet" type="text/css" media="all" href="../rw_common/themes/Engineer/consolidated-4.css?rwcache=651520849" />
 		
-	    		<link rel='stylesheet' type='text/css' media='all' href='../rw_common/plugins/stacks/stacks.css?rwcache=651519796' />
-		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page4.css?rwcache=651519796' />
+	    		<link rel='stylesheet' type='text/css' media='all' href='../rw_common/plugins/stacks/stacks.css?rwcache=651520849' />
+		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page4.css?rwcache=651520849' />
         
         
         
@@ -322,7 +320,7 @@ function getQueryVariable(variable=paramName, set_info=true) {
 		</div>
 	</footer>
 
-	<script type="text/javascript" src="../rw_common/themes/Engineer/js/main.js?rwcache=651519796"></script>
+	<script type="text/javascript" src="../rw_common/themes/Engineer/js/main.js?rwcache=651520849"></script>
 </body>
 
 </html>

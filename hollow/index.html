@@ -106,7 +106,17 @@ function submitForm() {
             console.log(data);
             const link = 'http://'+domain + '/hollow?'+paramName+'=' + data["code"];
             document.getElementById("info").innerHTML = "<div class=\"ui blue message\"> 你的信件链接: "+
-                "<a href='"+link+"' target='_blank'>"+link+"</a></div>"
+                "<a href='"+link+"' target='_blank'>"+link+"</a></p><div style='width=100%'><div id='qrcode'></div></div></div>";
+            new QRCode(document.getElementById('qrcode'), 
+                {
+                    text: link,
+                    width: 100,
+                    height: 100,
+                    colorDark : "#778899",
+                    colorLight : "#d9ecff",
+                    correctLevel : QRCode.CorrectLevel.H
+                }
+            );
         },
         error: function(errMsg) {
             console.log(errMsg);
@@ -221,12 +231,12 @@ function getQueryVariable(variable=paramName, set_info=true) {
 
 	
 	<title>树洞 | 树洞</title>
-	<link rel="stylesheet" type="text/css" media="all" href="../rw_common/themes/Engineer/consolidated-3.css?rwcache=651520849" />
+	<link rel="stylesheet" type="text/css" media="all" href="../rw_common/themes/Engineer/consolidated-3.css?rwcache=651524863" />
 		
 	   <script>
 			 getQueryVariable() 
-		</script> 		<link rel='stylesheet' type='text/css' media='all' href='../rw_common/plugins/stacks/stacks.css?rwcache=651520849' />
-		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page3.css?rwcache=651520849' />
+		</script> 		<link rel='stylesheet' type='text/css' media='all' href='../rw_common/plugins/stacks/stacks.css?rwcache=651524863' />
+		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page3.css?rwcache=651524863' />
         
         
         
@@ -307,7 +317,7 @@ function getQueryVariable(variable=paramName, set_info=true) {
 		</div>
 	</footer>
 
-	<script type="text/javascript" src="../rw_common/themes/Engineer/js/main.js?rwcache=651520849"></script>
+	<script type="text/javascript" src="../rw_common/themes/Engineer/js/main.js?rwcache=651524863"></script>
 </body>
 
 </html>

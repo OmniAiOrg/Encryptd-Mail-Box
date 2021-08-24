@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+<link
+  async
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+/>
+
+<script>
+function auto_copyright($year) {
+	var $currentdate = new Date();
+	var $currentyear = $currentdate.getFullYear();
+	var $cty = $currentyear.toString();
+	var $sty = $year.toString();
+	if ($currentyear > $year) {
+		document.write($sty + ' - ' + $cty);
+		console.log($cty);
+	} else {
+		document.write($cty);
+	}
+}
+</script>
+
+<script
+  async
+  src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"
+></script>
+
+<script>
+const serverIpAddress = "http://localhost:8000";
+const paramName = "id";
+
+function submitForm() {
+    // 提交表格到服务器，并且返回应有的索引编码
+    console.log('submitForm')
+    var TitleText = document.getElementById("Title").value;
+    var AccessCode = document.getElementById("AccessCode").value;
+    var textarea = document.getElementById("textarea").value;
+    console.log('Title: '+TitleText+', AccessCode: '+AccessCode+', textarea:'+textarea)
+
+    if (TitleText.length === 0) {
+        document.getElementById("info").innerHTML = 
+        "<div class=\"ui orange mini message\">标题不要为空哦</div>"
+        return;
+    } else if (textarea.length === 0) {
+        document.getElementById("info").innerHTML = 
+        "<div class=\"ui orange mini message\">内容不要为空哦</div>"
+        return;
+    }
+
+    const domain = document.domain;
+
+    $.ajax({
+        type: "POST",
+        url: serverIpAddress+"/data",
+        // The key needs to match your method's input parameter (case-sensitive).
+        data: JSON.stringify({
+            title: TitleText,
+            password: AccessCode,
+            text: textarea
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(data){
+            console.log(data);
+            document.getElementById("info").innerHTML = "<div class=\"ui blue message\"> Your Link is: "+
+                'http://'+domain + '/hollow?'+paramName+'=' + data["code"]+"</div>"
+        },
+        error: function(errMsg) {
+            alert(errMsg);
+        }
+    });
+}
+
+let code;
+
+function getData(passwordExist=true) {
+    // 获取数据
+    let pass = document.getElementById("AccessCode")
+    if (pass){pass = pass.value;} else {pass="";}
+    console.log('code: '+code+', +pass: '+pass)
+
+    if (code.length === 0) {
+        document.getElementById("info").innerHTML = 
+        "<div class=\"ui mini message\">请输入有效链接哦🔗</div>"
+        return;
+    } else if (pass.length === 0 && passwordExist) {
+        document.getElementById("info").innerHTML = 
+        "<div class=\"ui mini message\">秘钥不能为空哦</div>"
+        return;
+    }
+
+    $.ajax({
+        type: "GET",
+        url: serverIpAddress+"/data?code="+code+"&pass="+pass,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(data){
+            console.log(data);
+            const template = 
+            '<div class="ui centered cards">\
+                <div class="card">\
+                    <div class="content">\
+                      <div class="header">'+data["title"]+'</div>\
+                      <div class="description"> ' +
+                      data["text"]+
+                      '</div>\
+                    </div>\
+                </div>\
+              </div>'
+            document.getElementById("info").innerHTML = template
+        },
+        error: function(errMsg) {
+            document.getElementById("info").innerHTML = 
+                "<div class=\"ui mini message\">请使用正确的秘钥🔑</div>"
+        }
+    });
+}
+
+
+function getQueryVariable(variable=paramName, set_info=true) {
+    // 获取params
+   var query = window.location.search.substring(1);
+   var vars = query.split("&");
+   for (var i=0;i<vars.length;i++) {
+           var pair = vars[i].split("=");
+           if(pair[0] == variable){
+            code = pair[1];
+            $.ajax({
+                type: "GET",
+                url: serverIpAddress+"/data/title?code="+code,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function(data){
+                    console.log('title: '+data["title"]+", code: "+code);
+                    passwordExist = data["password"];
+
+                    if (set_info && passwordExist){
+                        document.getElementById("title").innerHTML = 
+                        '<h3 class="ui center aligned dividing header">'
+                        +data["title"]+
+                        '</h3>';
+                    }
+
+                    
+                    if (!passwordExist || passwordExist == false) {
+                        getData(passwordExist);
+                    } else {
+                        document.getElementById("form").innerHTML = 
+                        "<div class=\"ui form\">\
+                            <div class=\"field\">\
+                              <input type=\"text\" placeholder=\"秘钥\" id=\"AccessCode\">\
+                            </div>\
+                          <a class=\"fluid ui submit button\" href=\"javascript: getData()\">拆封</a>\
+                        </div>";
+                    }
+                    return code;
+                },
+                error: function(errMsg) {
+                    console.log(errMsg.status);
+                    if (errMsg.status == 404) {
+                        document.getElementById("info").innerHTML = 
+                        "<div class=\"ui mini message\">404 - 树洞里没有这封信哦🐻</div>"
+                    }
+                    else if(errMsg.status >= 500 || errMsg.status == 0){
+                        document.getElementById("info").innerHTML = 
+                        "<div class=\"ui mini message\">树洞暂时失联啦！程序员小哥哥正在紧急修复中 🔧</div>"
+                    }
+                }
+            });
+            return '';
+        }
+   }
+   return '';
+}
+
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="generator" content="RapidWeaver" />
+		
+	
+	<title>秘密树洞</title>
+	<link rel="stylesheet" type="text/css" media="all" href="rw_common/themes/Engineer/consolidated-0.css?rwcache=651494476" />
+		
+	    		<link rel='stylesheet' type='text/css' media='all' href='rw_common/plugins/stacks/stacks.css?rwcache=651494476' />
+		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page0.css?rwcache=651494476' />
+        
+        
+        
+        
+		
+        <meta name="formatter" content="Stacks v4.2.0 (5461)" >
+		<meta class="stacks4 stack version" id="com.weavium.stacks.Image_Card" name="Image Card" content="1.0.8">
+		
+
+</head>
+
+<!-- This page was created with RapidWeaver from Realmac Software. http://www.realmacsoftware.com -->
+
+<body>
+	<div class="hero" id="hero">
+		<nav class="navbar navbar-expand-lg">
+			<a class="navbar-brand" href="https://mail.omniai.org/"> <span class="navbar-title">树洞</span></a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ml-auto"><li class="nav-item active"><a href="./" rel="" class="nav-link">树洞</a></li><li class="nav-item"><a href="written/" target="_blank" class="nav-link">写信</a></li></ul>
+			</div>
+		</nav>
+
+		<div class="hero-content container d-flex align-items-center" id="hero">
+			<div class="">
+				<h1 class="hero-title">树洞</h1>
+				<p class="hero-slogan display-4">记录你的所思所想</p>
+			</div>
+			<div class="hero-background" title="树洞"></div>
+			<div class="hero-overlay"></div>
+		</div>
+
+	</div>
+
+    <div class="content">
+        <section class="main" style="position: relative;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 main">
+                        
+<div id='stacks_out_1' class='stacks_top'><div id='stacks_in_1' class=''><div id='stacks_out_4' class='stacks_out'><div id='stacks_in_4' class='stacks_in stack_stack'><div id='stacks_out_10' class='stacks_out'><div id='stacks_in_10' class='stacks_in com_weavium_stacks_Image_Card_stack'>
+<link href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' rel='stylesheet'>
+
+
+
+
+
+	<script src="./webfont.js?rwcache=651494476"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/webfont/1.6.24/webfontloader.js"></script> 
+	<script>
+	  WebFont.load({
+	    google: {
+	      families: ['Montserrat']
+	    }
+	  });
+	</script>
+
+
+<div id='card-stacks_in_10' class="card-center">
+	<a  href="written/" >
+		<div class='card-inner shift'>
+			<span class='card-caption '><span style="font:32px PingFangSC-Regular; ">写信</span></span>
+			<span class='card-more '>
+	      
+	        <i class="ion-arrow-right-c"></i>
+	      
+				
+				
+	      
+	      
+			</span>
+		</div>
+	</a>
+</div>
+
+
+</div></div></div></div></div></div>
+
+                    </div>
+
+                    <div class="col-sm-12 sidebar">
+                        <h2></h2>
+                         
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12 footer-content">
+					<ul class="navbar-nav ml-auto"><li class="nav-item active"><a href="./" rel="" class="nav-link">树洞</a></li><li class="nav-item"><a href="written/" target="_blank" class="nav-link">写信</a></li></ul>
+					&copy; <script>auto_copyright(2020);</script> OmniAi.org</p> <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span>; </span>         <span id="busuanzi_container_site_uv">UV: <span id="busuanzi_value_site_uv"></span>; </span>         <span id="busuanzi_container_page_pv">Page PV:<span id="busuanzi_value_page_pv"></span>.</span>     </p> <a href="#" id="rw_email_contact">联系树洞</a><script type="text/javascript">var _rwObsfuscatedHref0 = "mai";var _rwObsfuscatedHref1 = "lto";var _rwObsfuscatedHref2 = ":bh";var _rwObsfuscatedHref3 = "228";var _rwObsfuscatedHref4 = "3@n";var _rwObsfuscatedHref5 = "yu.";var _rwObsfuscatedHref6 = "edu";var _rwObsfuscatedHref = _rwObsfuscatedHref0+_rwObsfuscatedHref1+_rwObsfuscatedHref2+_rwObsfuscatedHref3+_rwObsfuscatedHref4+_rwObsfuscatedHref5+_rwObsfuscatedHref6; document.getElementById("rw_email_contact").href = _rwObsfuscatedHref;</script>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<script type="text/javascript" src="rw_common/themes/Engineer/js/main.js?rwcache=651494476"></script>
+</body>
+
+</html>

@@ -68,8 +68,9 @@ function auto_copyright($year) {
 
 <script>
 const serverIpAddress = "https://us.omniai.org:8010";
-// const serverIpAddress = "http://localhost:8000";
 const paramName = "id";
+
+let $generated_url = "出错啦！链接没有复制成功 😢"
 
 function submitForm() {
     // 提交表格到服务器，并且返回应有的索引编码
@@ -105,18 +106,13 @@ function submitForm() {
         success: function(data){
             console.log(data);
             const link = 'http://'+domain + '/hollow?'+paramName+'=' + data["code"];
-            document.getElementById("info").innerHTML = "<div class=\"ui blue message\"> 你的信件链接: "+
-                "<a href='"+link+"' target='_blank'>"+link+"</a></p><div style='width=100%'><div id='qrcode'></div></div></div>";
-            new QRCode(document.getElementById('qrcode'), 
-                {
-                    text: link,
-                    width: 100,
-                    height: 100,
-                    colorDark : "#778899",
-                    colorLight : "#d9ecff",
-                    correctLevel : QRCode.CorrectLevel.H
-                }
-            );
+            document.getElementById("info").innerHTML = "🎉 投递成功啦！"+
+                // "<a href='"+link+"' target='_blank'>[点击]</a></p></div>";
+                '</p><a href="'+link+'" target="_blank" class="fluid small ui button">查看你的信笺</a>';
+            document.getElementById("clipboard").style.visibility="visible";
+                $generated_url = link;
+
+
         },
         error: function(errMsg) {
             console.log(errMsg);
@@ -219,6 +215,7 @@ function getQueryVariable(variable=paramName, set_info=true) {
    }
    return '';
 }
+
 </script>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="robots" content="index, follow" />
@@ -231,10 +228,10 @@ function getQueryVariable(variable=paramName, set_info=true) {
 
 	
 	<title>秘密树洞</title>
-	<link rel="stylesheet" type="text/css" media="all" href="rw_common/themes/Engineer/consolidated-0.css?rwcache=651525249" />
+	<link rel="stylesheet" type="text/css" media="all" href="rw_common/themes/Engineer/consolidated-0.css?rwcache=651790405" />
 		
-	    		<link rel='stylesheet' type='text/css' media='all' href='rw_common/plugins/stacks/stacks.css?rwcache=651525249' />
-		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page0.css?rwcache=651525249' />
+	    		<link rel='stylesheet' type='text/css' media='all' href='rw_common/plugins/stacks/stacks.css?rwcache=651790405' />
+		<link rel='stylesheet' type='text/css' media='all' href='files/stacks_page_page0.css?rwcache=651790405' />
         
         
         
@@ -285,7 +282,7 @@ function getQueryVariable(variable=paramName, set_info=true) {
 
 
 
-	<script src="./webfont.js?rwcache=651525249"></script>
+	<script src="./webfont.js?rwcache=651790405"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/webfont/1.6.24/webfontloader.js"></script> 
 	<script>
 	  WebFont.load({
@@ -338,7 +335,8 @@ function getQueryVariable(variable=paramName, set_info=true) {
 		</div>
 	</footer>
 
-	<script type="text/javascript" src="rw_common/themes/Engineer/js/main.js?rwcache=651525249"></script>
+	<script type="text/javascript" src="rw_common/themes/Engineer/js/main.js?rwcache=651790405"></script>
+<script src="rw_common/assets/global.js?rwcache=651790405"></script>
 </body>
 
 </html>
